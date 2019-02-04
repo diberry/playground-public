@@ -32,6 +32,9 @@ ForEach($file in $files) {
   $services = $content | select-string -pattern "services: "
   $services = $services.Line.ToString().Replace("services: ","")
   
+  $subservice = $content | select-string -pattern "ms.subservice: "
+  $subservice = $subservice.Line.ToString().Replace("ms.subservice: ","")
+
   $date = $content | select-string -pattern "ms.date"
   $date = [datetime]$date.ToString().Replace("ms.date: ","")
   $date = Get-Date -Format d -Date $date
@@ -55,15 +58,12 @@ ForEach($file in $files) {
     $fileWithDate | add-member -MemberType NoteProperty -name Manager -Value $manager
     $fileWithDate | add-member -MemberType NoteProperty -name Topic -Value $topic
     $fileWithDate | add-member -MemberType NoteProperty -name Services -Value $services
+    $fileWithDate | add-member -MemberType NoteProperty -name Subservice -Value $subservice
     $fileWithDate | add-member -MemberType NoteProperty -name FileName -Value $file.Name
-    $fileWithDate | add-member -MemberType NoteProperty -name FullName -Value $file.FullName
-
-    #Write-Host $fileWithDate
+    $fileWithDate | add-member -MemberType NoteProperty -name FolderName -Value $file.DirectoryName
 
     #Add the object to the array
     $filesWithDates+=$fileWithDate
   }
 }
-#Sort by date, ascending
 $filesWithDates | ConvertTo-Csv -NoTypeInformation | % {$_.Replace('"','')} | Out-File freshness.csv
-#Export-Csv /Users/diberry/repos/freshness/freshness.csv
